@@ -1,6 +1,6 @@
 import { Route, Routes} from "react-router-dom";
 
-import { HomePage } from "../pages/home";
+import { HomePage } from "../pages/home/Home";
 import { CartPage } from "../pages/cart";
 
 export const RouteList = () => {
