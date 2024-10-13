@@ -1,0 +1,30 @@
+.navbar {
+    width: 100vw;
+    height: 10vh;
+
+    display: flex;
+    flex-direction: row;
+    align-content: center;
+    justify-content: center;
+
+    &-item {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    h2 {
+        margin: 0px 32px;
+
+        color: black;
+        font-weight: 400;
+    }
+
+    h2:hover {
+        color: lightcoral;
+    }
+}
+
+.link {
+    text-decoration: none;
+}
