@@ -2,11 +2,15 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import './Home.scss';
+import { useCart } from '../../context/CartContext'; // Импортируем хук для работы с корзиной
 
 export const HomePage = () => {
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState('all');
+
+    const { addToCart } = useCart(); // Используем функцию для добавления товара в корзину
+
 
     // Функция для загрузки всех продуктов
     const fetchProducts = async () => {
@@ -61,7 +65,7 @@ export const HomePage = () => {
                                 <h2>{product.title}</h2>
                                 <p className="description">{product.description.slice(0, 100)}...</p>
                                 <p className="price">Price: ${product.price}</p>
-                                <button className="add-button">ADD</button>
+                                <button className="add-button" onClick={() => addToCart(product)}>ADD</button>
                             </div>
                         </div>
                     ))
