@@ -1,5 +1,3 @@
-// src/pages/home/Home.scss
-
 .home {
   display: flex;
   flex-direction: column;
@@ -9,7 +7,7 @@
   .categories {
       display: flex;
       justify-content: center;
-      flex-wrap: wrap; /* Позволяет перенос категорий на новую строку */
+      flex-wrap: wrap; 
       margin-bottom: 20px;
       width: 100%;
       padding: 10px;
@@ -18,7 +16,7 @@
   }
 
   .category-item {
-      flex: 1 1 15%; /* Категории равномерно распределяются по строке */
+      flex: 1 1 15%; 
       margin: 10px;
       padding: 15px 10px;
       text-align: center;
@@ -121,4 +119,44 @@
         border-radius: 4px;
     }
 }
+.autocomplete-suggestions {
+  position: absolute;
+  top: 100%; 
+  left: 0;
+  right: 0;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  max-height: 200px; 
+  overflow-y: auto;  
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  z-index: 1000; 
+}
+
+.autocomplete-suggestions li {
+  padding: 10px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background-color: #f0f0f0;
+  }
+}
+
+.search-bar {
+  position: relative; 
+  width: 80%; 
+  margin-bottom: 20px;
+
+  input {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+}
+
+
 }

@@ -11,6 +11,7 @@ export const HomePage = () => {
     const [selectedCategory, setSelectedCategory] = useState('all');
     const [selectedProductId, setSelectedProductId] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const [suggestions, setSuggestions] = useState([]); // Для хранения предложений
 
     const { addToCart } = useCart();
 
@@ -47,14 +48,35 @@ export const HomePage = () => {
 
     const filteredProducts = useMemo(() => {
         return products
-            .filter(product => 
+            .filter(product =>
                 selectedCategory === 'all' || product.category === selectedCategory
             )
-            .filter(product => 
+            .filter(product =>
                 product.title.toLowerCase().includes(searchTerm.toLowerCase())
             );
     }, [selectedCategory, products, searchTerm]);
 
+    const handleSuggestionClick = (title) => {
+        setSearchTerm(title);
+        setSuggestions([]);
+    };
+    
+    useEffect(() => {
+        if (searchTerm.length > 0) {
+            const filteredSuggestions = products.filter(product =>
+                product.title.toLowerCase().includes(searchTerm.toLowerCase())
+            ).slice(0, 5);
+    
+            if (filteredSuggestions.length === 1 && filteredSuggestions[0].title.toLowerCase() === searchTerm.toLowerCase()) {
+                setSuggestions([]);
+            } else {
+                setSuggestions(filteredSuggestions);
+            }
+        } else {
+            setSuggestions([]);
+        }
+    }, [searchTerm, products]);
+    
     return (
         <div className="home">
             <div className="search-bar">
@@ -64,6 +86,19 @@ export const HomePage = () => {
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                 />
+                {}
+                {suggestions.length > 0 && (
+                    <ul className="autocomplete-suggestions">
+                        {suggestions.map((suggestion) => (
+                            <li 
+                                key={suggestion.id}
+                                onClick={() => handleSuggestionClick(suggestion.title)}
+                            >
+                                {suggestion.title}
+                            </li>
+                        ))}
+                    </ul>
+                )}
             </div>
 
             <div className="categories">
@@ -99,7 +134,7 @@ export const HomePage = () => {
                         </div>
                     ))
                 ) : (
-                    <p>Загрузка продуктов...</p>
+                    <p>Продукты не найдены...</p>
                 )}
             </div>
 
