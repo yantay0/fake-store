@@ -10,6 +10,7 @@ export const HomePage = () => {
     const [categories, setCategories] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState('all');
     const [selectedProductId, setSelectedProductId] = useState(null);
+    const [searchTerm, setSearchTerm] = useState('');
 
     const { addToCart } = useCart();
 
@@ -45,13 +46,26 @@ export const HomePage = () => {
     }, []);
 
     const filteredProducts = useMemo(() => {
-        return selectedCategory === 'all'
-            ? products
-            : products.filter(product => product.category === selectedCategory);
-    }, [selectedCategory, products]);
+        return products
+            .filter(product => 
+                selectedCategory === 'all' || product.category === selectedCategory
+            )
+            .filter(product => 
+                product.title.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+    }, [selectedCategory, products, searchTerm]);
 
     return (
         <div className="home">
+            <div className="search-bar">
+                <input
+                    type="text"
+                    placeholder="Search for products..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                />
+            </div>
+
             <div className="categories">
                 {categories.map(category => (
                     <div

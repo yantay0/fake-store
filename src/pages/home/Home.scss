@@ -106,4 +106,19 @@
         background-color: darkred;
     }
   }
+
+  .search-bar {
+    margin-bottom: 20px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+
+    input {
+        width: 80%;
+        padding: 10px;
+        font-size: 16px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+}
 }
