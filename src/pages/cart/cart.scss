@@ -58,6 +58,12 @@
         }
     }
 
+    .total-price {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
     .empty-cart {
         text-align: center;
         font-size: 18px;
