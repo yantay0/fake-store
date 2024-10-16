@@ -1,4 +1,3 @@
-// src/App.js
 import { BrowserRouter as Router, useLocation } from 'react-router-dom';
 import { NavBar } from './common/navbar';
 import { RouteList } from './routes';
@@ -17,6 +16,7 @@ const AppContent = () => {
     </>
   );
 };
+
 const App = () => {
   return (
     <Router>

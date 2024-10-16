@@ -1,4 +1,3 @@
-// src/navbar/index.jsx
 import React from "react";
 import { NavLink } from "react-router-dom";
 import { FiLogOut } from "react-icons/fi"; 
