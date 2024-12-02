@@ -1,17 +1,15 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from 'axios';
 
 const AuthContext = createContext();
 
 export const useAuth = () => useContext(AuthContext);
 
-const mockUser = {
-    username: "user",
-    password: "password"
-};
-
 export const AuthProvider = ({ children }) => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -20,15 +18,25 @@ export const AuthProvider = ({ children }) => {
             setIsAuthenticated(true);
             navigate("/");
         }
-    }, []);
+    }, [navigate]);
 
-    const login = (username, password) => {
-        if (username === mockUser.username && password === mockUser.password) {
-            localStorage.setItem("token", mockUser.username + mockUser.password);
+    const login = async (username, password) => {
+        setIsLoading(true);
+        setError(null);
+
+        try {
+            const response = await axios.post('https://fakestoreapi.com/auth/login', 
+                { username, password }
+            );
+            
+            localStorage.setItem("token", response.data.token);
             setIsAuthenticated(true);
-            navigate("/"); 
-        } else {
-            alert("Неверное имя пользователя или пароль");
+            navigate("/");
+        } catch (err) {
+            setError("Invalid username or password");
+            setIsAuthenticated(false);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -39,7 +47,13 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ isAuthenticated, login, logout }}>
+        <AuthContext.Provider value={{ 
+            isAuthenticated, 
+            login, 
+            logout, 
+            isLoading,
+            error 
+        }}>
             {children}
         </AuthContext.Provider>
     );

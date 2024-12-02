@@ -11,26 +11,35 @@ export const ProductDetail = ({ id, onClose }) => {
     const { addToCart } = useCart();
 
     useEffect(() => {
-        console.log(id);
-
         if (!id) return;
+    
         setLoading(true);
-        fetch(`https://fakestoreapi.com/products/${id}`)
-            .then(response => {
+        const fetchProduct = async () => {
+            try {
+                const response = await fetch(`https://fakestoreapi.com/products/${id}`);
                 if (!response.ok) {
                     throw new Error("Failed to fetch product details");
                 }
-
-                return response.json();
-            })
-            .then(data => {
+    
+                const data = await response.json();
+                
                 setProduct(data);
+            } catch (err) {
+                const cache = await caches.open("api-cache-v1");
+                const cachedResponse = await cache.match(`https://fakestoreapi.com/products/${id}`);
+                if (cachedResponse) {
+                    const data = await cachedResponse.json();
+                    
+                    setProduct(data);
+                } else {
+                    setError(err.message);
+                }
+            } finally {
                 setLoading(false);
-            })
-            .catch(err => {
-                setError(err.message);
-                setLoading(false);
-            });
+            }
+        };
+    
+        fetchProduct();
     }, [id]);
 
     const handleAddToCart = useCallback(() => {
