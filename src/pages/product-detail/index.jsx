@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer, useCallback, useState } from "react";
+import React, { useState, useEffect, useReducer, useCallback } from "react";
 import { useCart } from "../../context/CartContext";
 
 const initialState = {
@@ -27,10 +27,17 @@ const productReducer = (state, action) => {
 
 export const ProductDetail = ({ id, onClose }) => {
     const [state, dispatch] = useReducer(productReducer, initialState);
-    const { addToCart } = useCart();
+    const [product, setProduct] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [isAdded, setIsAdded] = useState(false);
+    
+    // New state for comments
+    const [comment, setComment] = useState('');
+    const [comments, setComments] = useState([]);
 
-    const [reviewText, setReviewText] = useState("");
-    const [reviews, setReviews] = useState([]);
+
+    const { addToCart } = useCart();
 
     useEffect(() => {
         if (!id) return;
@@ -61,19 +68,31 @@ export const ProductDetail = ({ id, onClose }) => {
         }, 2000);
     }, [addToCart, state.product]);
 
-    const handlePostReview = () => {
-        if (reviewText.trim()) {
-            setReviews((prevReviews) => [
-                ...prevReviews,
-                { text: reviewText, date: new Date().toLocaleString() },
-            ]);
-            setReviewText("");
-        }
+    // New function to handle comment submission
+    const handleCommentSubmit = (e) => {
+        e.preventDefault();
+        
+        if (comment.trim() === '') return;
+
+        const newComment = {
+            id: Date.now(), // Use timestamp as a simple unique ID
+            text: comment,
+            date: new Date().toLocaleString()
+        };
+
+        setComments([...comments, newComment]);
+        setComment(''); // Clear the input after submission
+    };
+
+    // New function to handle comment deletion
+    const handleDeleteComment = (commentId) => {
+        setComments(comments.filter(c => c.id !== commentId));
     };
 
     return (
         <>
             <div className="modal-overlay" onClick={onClose}></div>
+
             <div className="modal">
                 <div className="modal-content">
                     <button className="close-button" onClick={onClose}>×</button>
@@ -85,10 +104,19 @@ export const ProductDetail = ({ id, onClose }) => {
                         <div className="modal-content-item">
                             <h2>{state.product.title}</h2>
                             <img src={state.product.image} alt={state.product.title} />
-                            <p><strong>Category:</strong> {state.product.category}</p>
-                            <p><strong>Description:</strong> {state.product.description}</p>
-                            <p><strong>Price:</strong> ${state.product.price}</p>
-                            <p><strong>Rating:</strong> {state.product.rating.rate} / 5 ({state.product.rating.count} reviews)</p>
+                            <p>
+                                <strong>Category:</strong> {state.product.category}
+                            </p>
+                            <p>
+                                <strong>Description:</strong> {state.product.description}
+                            </p>
+                            <p>
+                                <strong>Price:</strong> ${state.product.price}
+                            </p>
+                            <p>
+                                <strong>Rating:</strong> {state.product.rating.rate} / 5 (
+                                {state.product.rating.count} reviews)
+                            </p>
                             <button
                                 className="add-button"
                                 onClick={handleAddToCart}
@@ -97,29 +125,49 @@ export const ProductDetail = ({ id, onClose }) => {
                                 {state.isAdded ? "Added" : "Add"}
                             </button>
 
-                            {/* Reviews Section */}
-                            <div className="reviews-section">
-                                <h3>Reviews</h3>
-                                {reviews.length > 0 ? (
-                                    <ul className="reviews-list">
-                                        {reviews.map((review, index) => (
-                                            <li key={index} className="review-item">
-                                                <p className="review-text">{review.text}</p>
-                                                <span className="review-date">{review.date}</span>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                ) : (
-                                    <p className="no-reviews">No reviews yet. Be the first to write one!</p>
-                                )}
-                                <div className="review-form">
+                            <div className="comments-section">
+                                <h3 className="comments-section__title">Product Comments</h3>
+                                
+                                {/* Comment Input Form */}
+                                <form 
+                                    className="comments-section__input" 
+                                    onSubmit={handleCommentSubmit}
+                                >
                                     <textarea
-                                        className="review-input"
-                                        value={reviewText}
-                                        onChange={(e) => setReviewText(e.target.value)}
-                                        placeholder="Write your review here..."
-                                    ></textarea>
-                                    <button className="review-button" onClick={handlePostReview}>Post Review</button>
+                                        value={comment}
+                                        onChange={(e) => setComment(e.target.value)}
+                                        placeholder="Write your comment here..."
+                                    />
+                                    <button type="submit">
+                                        Post Comment
+                                    </button>
+                                </form>
+
+                                {/* Comments List */}
+                                <div className="comments-section__list">
+                                    {comments.length === 0 ? (
+                                        <p className="no-comments">No comments yet</p>
+                                    ) : (
+                                        comments.map((comment) => (
+                                            <div 
+                                                key={comment.id} 
+                                                className="comment"
+                                            >
+                                                <div className="comment__content">
+                                                    <p>{comment.text}</p>
+                                                    <span className="comment-date">
+                                                        {comment.date}
+                                                    </span>
+                                                </div>
+                                                <button 
+                                                    className="comment__delete"
+                                                    onClick={() => handleDeleteComment(comment.id)}
+                                                >
+                                                    Delete
+                                                </button>
+                                            </div>
+                                        ))
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -128,4 +176,4 @@ export const ProductDetail = ({ id, onClose }) => {
             </div>
         </>
     );
-};
+}
