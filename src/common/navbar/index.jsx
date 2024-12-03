@@ -1,6 +1,6 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
-import { FiLogOut } from "react-icons/fi"; 
+import { FiLogOut, FiUser } from "react-icons/fi"; 
 import { useAuth } from "../../context/AuthContext"; 
 
 export const NavBar = () => {
@@ -16,6 +16,11 @@ export const NavBar = () => {
             key: 1,
             name: "Корзина",
             routeTo: "/cart",
+        },
+        {
+            key: 2,
+            name: "Профиль",
+            routeTo: "/profile",
         }
     ];
 
@@ -29,7 +34,7 @@ export const NavBar = () => {
                 </div>
             ))}
 
-            {/* Иконка Logout */}
+            {}
             <div className="navbar-item logout" onClick={logout}>
                 <FiLogOut size={24} />
             </div>

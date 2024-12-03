@@ -4,11 +4,14 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { HomePage } from "../pages/home/Home";
 import { CartPage } from "../pages/cart";
 import { Login } from "../pages/login/index";
+import { ProfilePage } from "../pages/profile/Profile";
 import { useAuth } from "../context/AuthContext";
 
-// Компонент для защиты маршрутов
 const ProtectedRoute = ({ children }) => {
-    const { isAuthenticated } = useAuth();
+    const { isAuthenticated, isLoading } = useAuth();
+    if (isLoading) {
+        return <p>Загрузка...</p>; 
+    }
     return isAuthenticated ? children : <Navigate to="/login" />;
 };
 
@@ -31,5 +34,14 @@ export const RouteList = () => (
                 </ProtectedRoute>
             }
         />
+        <Route
+            path="/profile"
+            element={
+                <ProtectedRoute>
+                    <ProfilePage />
+                </ProtectedRoute>
+            }
+        />
+        <Route path="*" element={<Navigate to="/" />} />
     </Routes>
 );
