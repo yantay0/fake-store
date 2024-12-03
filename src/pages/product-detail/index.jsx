@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer, useCallback } from "react";
+import React, { useState, useEffect, useReducer, useCallback } from "react";
 import { useCart } from "../../context/CartContext";
 
 const initialState = {
