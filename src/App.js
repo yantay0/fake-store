@@ -3,6 +3,7 @@ import { NavBar } from './common/navbar';
 import { RouteList } from './routes';
 import { CartProvider } from './context/CartContext';
 import { AuthProvider } from './context/AuthContext';
+import { WishlistProvider } from './context/WishlistContext';
 import './App.scss';
 
 const AppContent = () => {
@@ -22,7 +23,9 @@ const App = () => {
     <Router>
       <AuthProvider>
         <CartProvider>
-          <AppContent />
+          <WishlistProvider> {/* Добавляем провайдер */}
+            <AppContent />
+          </WishlistProvider>
         </CartProvider>
       </AuthProvider>
     </Router>
