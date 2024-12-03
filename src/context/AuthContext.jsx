@@ -13,11 +13,15 @@ export const AuthProvider = ({ children }) => {
     const navigate = useNavigate();
 
     useEffect(() => {
+        setIsLoading(true);
         const token = localStorage.getItem("token");
         if (token) {
             setIsAuthenticated(true);
-            navigate("/");
+        } else {
+            setIsAuthenticated(false);
+            navigate("/login");
         }
+        setIsLoading(false);
     }, [navigate]);
 
     const login = async (username, password) => {
