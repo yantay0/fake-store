@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback } from "react";
-
 import { useCart } from '../../context/CartContext';
 
 export const ProductDetail = ({ id, onClose }) => {
@@ -7,6 +6,10 @@ export const ProductDetail = ({ id, onClose }) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isAdded, setIsAdded] = useState(false);
+    
+    // New state for comments
+    const [comment, setComment] = useState('');
+    const [comments, setComments] = useState([]);
 
     const { addToCart } = useCart();
 
@@ -43,6 +46,27 @@ export const ProductDetail = ({ id, onClose }) => {
         }, 2000);
     }, [addToCart, product]);
 
+    // New function to handle comment submission
+    const handleCommentSubmit = (e) => {
+        e.preventDefault();
+        
+        if (comment.trim() === '') return;
+
+        const newComment = {
+            id: Date.now(), // Use timestamp as a simple unique ID
+            text: comment,
+            date: new Date().toLocaleString()
+        };
+
+        setComments([...comments, newComment]);
+        setComment(''); // Clear the input after submission
+    };
+
+    // New function to handle comment deletion
+    const handleDeleteComment = (commentId) => {
+        setComments(comments.filter(c => c.id !== commentId));
+    };
+
     return (
         <>
             <div className="modal-overlay" onClick={onClose}></div>
@@ -69,10 +93,56 @@ export const ProductDetail = ({ id, onClose }) => {
                             >
                                 {isAdded ? "Added" : "Add"}
                             </button>
+
+                            <div className="comments-section">
+                                <h3 className="comments-section__title">Product Comments</h3>
+                                
+                                {/* Comment Input Form */}
+                                <form 
+                                    className="comments-section__input" 
+                                    onSubmit={handleCommentSubmit}
+                                >
+                                    <textarea
+                                        value={comment}
+                                        onChange={(e) => setComment(e.target.value)}
+                                        placeholder="Write your comment here..."
+                                    />
+                                    <button type="submit">
+                                        Post Comment
+                                    </button>
+                                </form>
+
+                                {/* Comments List */}
+                                <div className="comments-section__list">
+                                    {comments.length === 0 ? (
+                                        <p className="no-comments">No comments yet</p>
+                                    ) : (
+                                        comments.map((comment) => (
+                                            <div 
+                                                key={comment.id} 
+                                                className="comment"
+                                            >
+                                                <div className="comment__content">
+                                                    <p>{comment.text}</p>
+                                                    <span className="comment-date">
+                                                        {comment.date}
+                                                    </span>
+                                                </div>
+                                                <button 
+                                                    className="comment__delete"
+                                                    onClick={() => handleDeleteComment(comment.id)}
+                                                >
+                                                    Delete
+                                                </button>
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+                            </div>
                         </div>
                     )}
                 </div>
             </div>
         </>
     );
-}
+};

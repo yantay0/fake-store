@@ -18,26 +18,28 @@
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     z-index: 1000;
+    max-height: 90vh;
+    overflow-y: auto;
 
     &-content {
         position: relative;
 
         &-item {
             padding: 28px;
-
             display: flex;
             flex-direction: column;
             align-items: center;
 
             img {
                 margin: 16px 0;
-
                 width: 200px;
                 height: 200px;
+                object-fit: contain;
             }
 
             p {
                 margin: 8px 0;
+                text-align: center;
             }
 
             .add-button {
@@ -63,5 +65,91 @@
         border: none;
         font-size: 24px;
         cursor: pointer;
+    }
+
+    // New Comments Section Styles
+    .comments-section {
+        width: 100%;
+        margin-top: 20px;
+        
+        &__title {
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        &__input {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+
+            textarea {
+                width: 100%;
+                min-height: 100px;
+                padding: 10px;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                resize: vertical;
+            }
+
+            button {
+                align-self: flex-end;
+                padding: 8px 16px;
+                background-color: #4CAF50;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+
+                &:hover {
+                    background-color: #45a049;
+                }
+            }
+        }
+
+        &__list {
+            .no-comments {
+                text-align: center;
+                color: #888;
+                font-style: italic;
+            }
+
+            .comment {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                border-bottom: 1px solid #eee;
+                padding: 10px 0;
+
+                &__content {
+                    flex-grow: 1;
+                    margin-right: 10px;
+
+                    p {
+                        margin: 0 0 5px 0;
+                        text-align: left;
+                    }
+
+                    .comment-date {
+                        color: #888;
+                        font-size: 0.8em;
+                    }
+                }
+
+                &__delete {
+                    background-color: #f44336;
+                    color: white;
+                    border: none;
+                    padding: 5px 10px;
+                    border-radius: 4px;
+                    cursor: pointer;
+
+                    &:hover {
+                        background-color: #d32f2f;
+                    }
+                }
+            }
+        }
     }
 }
