@@ -1,45 +1,57 @@
-import React, { useEffect, useState, useMemo, useCallback } from 'react';
-import axios from 'axios';
-
-import { ProductDetail } from '../product-detail';
-import './Home.scss';
-import { useCart } from '../../context/CartContext';
+import React, { useEffect, useState, useMemo, useCallback } from "react";
+import axios from "axios";
+import { AiOutlineHeart, AiFillHeart } from "react-icons/ai";
+import { useCart } from "../../context/CartContext";
+import { useWishlist } from "../../context/WishlistContext";
+import "./Home.scss";
+import { ProductDetail } from "../product-detail";
 
 export const HomePage = () => {
-    const [products, setProducts] = useState([]);
-    const [categories, setCategories] = useState([]);
-    const [selectedCategory, setSelectedCategory] = useState('all');
-    const [selectedProductId, setSelectedProductId] = useState(null);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [suggestions, setSuggestions] = useState([]); // Для хранения предложений
+    const [state, setState] = useState({
+        products: [],
+        categories: [],
+        selectedCategory: "all",
+        searchTerm: "",
+        suggestions: [],
+        isLoading: false,
+        error: null,
+        selectedProductId: null,
+    });
 
     const { addToCart } = useCart();
+    const { addToWishlist, removeFromWishlist, wishlist } = useWishlist();
 
+    // Fetch products
     const fetchProducts = async () => {
         try {
-            const response = await axios.get('https://fakestoreapi.com/products');
-            setProducts(response.data);
-        } catch (error) {
-            console.error('Ошибка при загрузке данных:', error);
+            setState((prevState) => ({ ...prevState, isLoading: true, error: null }));
+            const response = await axios.get("https://fakestoreapi.com/products");
+            setState((prevState) => ({
+                ...prevState,
+                products: response.data,
+                isLoading: false,
+            }));
+        } catch (err) {
+            setState((prevState) => ({
+                ...prevState,
+                error: "Failed to load products. Please try again.",
+                isLoading: false,
+            }));
         }
     };
 
+    // Fetch categories
     const fetchCategories = async () => {
         try {
-            const response = await axios.get('https://fakestoreapi.com/products/categories');
-            setCategories(['all', ...response.data]);
-        } catch (error) {
-            console.error('Ошибка при загрузке категорий:', error);
+            const response = await axios.get("https://fakestoreapi.com/products/categories");
+            setState((prevState) => ({
+                ...prevState,
+                categories: ["all", ...response.data],
+            }));
+        } catch (err) {
+            console.error("Failed to load categories:", err);
         }
     };
-
-    const handleOpenModal = useCallback((productId) => {
-        setSelectedProductId(productId);
-    }, []);
-
-    const handleCloseModal = useCallback(() => {
-        setSelectedProductId(null);
-    }, []);
 
     useEffect(() => {
         fetchProducts();
@@ -47,52 +59,65 @@ export const HomePage = () => {
     }, []);
 
     const filteredProducts = useMemo(() => {
-        return products
-            .filter(product =>
-                selectedCategory === 'all' || product.category === selectedCategory
+        return state.products
+            .filter(
+                (product) =>
+                    state.selectedCategory === "all" ||
+                    product.category === state.selectedCategory
             )
-            .filter(product =>
-                product.title.toLowerCase().includes(searchTerm.toLowerCase())
+            .filter((product) =>
+                product.title.toLowerCase().includes(state.searchTerm.toLowerCase())
             );
-    }, [selectedCategory, products, searchTerm]);
+    }, [state.products, state.selectedCategory, state.searchTerm]);
 
-    const handleSuggestionClick = (title) => {
-        setSearchTerm(title);
-        setSuggestions([]);
-    };
-    
+    const isInWishlist = useCallback(
+        (productId) => wishlist.some((item) => item.id === productId),
+        [wishlist]
+    );
+
     useEffect(() => {
-        if (searchTerm.length > 0) {
-            const filteredSuggestions = products.filter(product =>
-                product.title.toLowerCase().includes(searchTerm.toLowerCase())
-            ).slice(0, 5);
-    
-            if (filteredSuggestions.length === 1 && filteredSuggestions[0].title.toLowerCase() === searchTerm.toLowerCase()) {
-                setSuggestions([]);
-            } else {
-                setSuggestions(filteredSuggestions);
-            }
+        if (state.searchTerm.length > 0) {
+            const filteredSuggestions = state.products
+                .filter((product) =>
+                    product.title.toLowerCase().includes(state.searchTerm.toLowerCase())
+                )
+                .slice(0, 5);
+            setState((prevState) => ({
+                ...prevState,
+                suggestions: filteredSuggestions,
+            }));
         } else {
-            setSuggestions([]);
+            setState((prevState) => ({ ...prevState, suggestions: [] }));
         }
-    }, [searchTerm, products]);
-    
+    }, [state.searchTerm, state.products]);
+
     return (
         <div className="home">
+            {/* Search Bar */}
             <div className="search-bar">
                 <input
                     type="text"
                     placeholder="Search for products..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    value={state.searchTerm}
+                    onChange={(e) =>
+                        setState((prevState) => ({
+                            ...prevState,
+                            searchTerm: e.target.value,
+                        }))
+                    }
                 />
-                {}
-                {suggestions.length > 0 && (
+                {state.suggestions.length > 0 && (
                     <ul className="autocomplete-suggestions">
-                        {suggestions.map((suggestion) => (
-                            <li 
+                        {state.suggestions.map((suggestion) => (
+                            <li
                                 key={suggestion.id}
-                                onClick={() => handleSuggestionClick(suggestion.title)}
+                                onClick={() =>
+                                    setState((prevState) => ({
+                                        ...prevState,
+                                        searchTerm: suggestion.title,
+                                        suggestions: [],
+                                    }))
+                                }
                             >
                                 {suggestion.title}
                             </li>
@@ -101,46 +126,86 @@ export const HomePage = () => {
                 )}
             </div>
 
+            {/* Categories */}
             <div className="categories">
-                {categories.map(category => (
+                {state.categories.map((category) => (
                     <div
                         key={category}
-                        className={`category-item ${selectedCategory === category ? 'active' : ''}`}
-                        onClick={() => setSelectedCategory(category)}
+                        className={`category-item ${
+                            state.selectedCategory === category ? "active" : ""
+                        }`}
+                        onClick={() =>
+                            setState((prevState) => ({
+                                ...prevState,
+                                selectedCategory: category,
+                            }))
+                        }
                     >
                         {category.toUpperCase()}
                     </div>
                 ))}
             </div>
 
+            {/* Product List */}
             <div className="product-list">
-                {filteredProducts.length > 0 ? (
+                {state.isLoading ? (
+                    <p>Loading products...</p>
+                ) : state.error ? (
+                    <p className="error">{state.error}</p>
+                ) : filteredProducts.length > 0 ? (
                     filteredProducts.map((product) => (
-                        <div 
-                            key={product.id} 
-                            className="product-card"
-                        >
-                            <div 
-                                className="product-details"
-                                onClick={() => handleOpenModal(product.id)}
-                            >
-                                <img src={product.image} alt={product.title} className="product-image" />
-                                <h2>{product.title}</h2>
-                                <p className="description">{product.description.slice(0, 100)}...</p>
-                                <p className="price">Price: ${product.price}</p>
-                            </div>
-
-                            <button className="add-button" onClick={() => addToCart(product)}>ADD</button>
-                        </div>
+                        <ProductCard
+                            key={product.id}
+                            product={product}
+                            isInWishlist={isInWishlist(product.id)}
+                            addToCart={addToCart}
+                            toggleWishlist={() =>
+                                isInWishlist(product.id)
+                                    ? removeFromWishlist(product.id)
+                                    : addToWishlist(product)
+                            }
+                            openModal={() =>
+                                setState((prevState) => ({
+                                    ...prevState,
+                                    selectedProductId: product.id,
+                                }))
+                            }
+                        />
                     ))
                 ) : (
-                    <p>Продукты не найдены...</p>
+                    <p>No products found...</p>
                 )}
             </div>
 
-            {selectedProductId && (
-                <ProductDetail id={selectedProductId} onClose={handleCloseModal} />
+            {/* Product Detail Modal */}
+            {state.selectedProductId && (
+                <ProductDetail
+                    id={state.selectedProductId}
+                    onClose={() =>
+                        setState((prevState) => ({
+                            ...prevState,
+                            selectedProductId: null,
+                        }))
+                    }
+                />
             )}
         </div>
     );
 };
+
+const ProductCard = ({ product, isInWishlist, addToCart, toggleWishlist, openModal }) => (
+    <div className="product-card">
+        <button className="wishlist-button" onClick={toggleWishlist}>
+            {isInWishlist ? <AiFillHeart size={20} /> : <AiOutlineHeart size={20} />}
+        </button>
+        <div className="product-details" onClick={openModal}>
+            <img src={product.image} alt={product.title} className="product-image" />
+            <h2>{product.title}</h2>
+            <p className="description">{product.description.slice(0, 100)}...</p>
+            <p className="price">Price: ${product.price}</p>
+        </div>
+        <button className="button add-button" onClick={() => addToCart(product)}>
+            ADD
+        </button>
+    </div>
+);

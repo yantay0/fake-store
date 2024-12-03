@@ -1,7 +1,32 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { useCart } from '../../context/CartContext';
+import React, { useEffect, useReducer, useCallback } from "react";
+import { useCart } from "../../context/CartContext";
+
+const initialState = {
+    product: null,
+    isLoading: true,
+    error: null,
+    isAdded: false,
+};
+
+const productReducer = (state, action) => {
+    switch (action.type) {
+        case "FETCH_PRODUCT_REQUEST":
+            return { ...state, isLoading: true, error: null };
+        case "FETCH_PRODUCT_SUCCESS":
+            return { ...state, isLoading: false, product: action.payload };
+        case "FETCH_PRODUCT_FAILURE":
+            return { ...state, isLoading: false, error: action.payload };
+        case "ADD_TO_CART":
+            return { ...state, isAdded: true };
+        case "RESET_ADDED":
+            return { ...state, isAdded: false };
+        default:
+            return state;
+    }
+};
 
 export const ProductDetail = ({ id, onClose }) => {
+    const [state, dispatch] = useReducer(productReducer, initialState);
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -11,40 +36,37 @@ export const ProductDetail = ({ id, onClose }) => {
     const [comment, setComment] = useState('');
     const [comments, setComments] = useState([]);
 
+
     const { addToCart } = useCart();
 
     useEffect(() => {
         if (!id) return;
-    
-        setLoading(true);
+
+        dispatch({ type: "FETCH_PRODUCT_REQUEST" });
 
         fetch(`https://fakestoreapi.com/products/${id}`)
-            .then(response => {
+            .then((response) => {
                 if (!response.ok) {
                     throw new Error("Failed to fetch product details");
                 }
-
                 return response.json();
             })
-            .then(data => {
-                setProduct(data);
-                console.log(data);
-                setLoading(false);
+            .then((data) => {
+                dispatch({ type: "FETCH_PRODUCT_SUCCESS", payload: data });
             })
-            .catch(err => {
-                setError(err.message);
-                setLoading(false);
+            .catch((err) => {
+                dispatch({ type: "FETCH_PRODUCT_FAILURE", payload: err.message });
             });
     }, [id]);
 
     const handleAddToCart = useCallback(() => {
-        addToCart(product);
-        setIsAdded(true);
+        addToCart(state.product);
+        dispatch({ type: "ADD_TO_CART" });
 
         setTimeout(() => {
-            setIsAdded(false);
+            dispatch({ type: "RESET_ADDED" });
         }, 2000);
-    }, [addToCart, product]);
+    }, [addToCart, state.product]);
 
     // New function to handle comment submission
     const handleCommentSubmit = (e) => {
@@ -74,24 +96,33 @@ export const ProductDetail = ({ id, onClose }) => {
             <div className="modal">
                 <div className="modal-content">
                     <button className="close-button" onClick={onClose}>×</button>
-                    {loading ? (
+                    {state.isLoading ? (
                         <p>Loading...</p>
-                    ) : error ? (
-                        <p>Error: {error}</p>
+                    ) : state.error ? (
+                        <p>Error: {state.error}</p>
                     ) : (
                         <div className="modal-content-item">
-                            <h2>{product.title}</h2>
-                            <img src={product.image} alt={product.title} />
-                            <p><strong>Category:</strong> {product.category}</p>
-                            <p><strong>Description:</strong> {product.description}</p>
-                            <p><strong>Price:</strong> ${product.price}</p>
-                            <p><strong>Rating:</strong> {product.rating.rate} / 5 ({product.rating.count} reviews)</p>
-                            <button 
-                                className="add-button" 
+                            <h2>{state.product.title}</h2>
+                            <img src={state.product.image} alt={state.product.title} />
+                            <p>
+                                <strong>Category:</strong> {state.product.category}
+                            </p>
+                            <p>
+                                <strong>Description:</strong> {state.product.description}
+                            </p>
+                            <p>
+                                <strong>Price:</strong> ${state.product.price}
+                            </p>
+                            <p>
+                                <strong>Rating:</strong> {state.product.rating.rate} / 5 (
+                                {state.product.rating.count} reviews)
+                            </p>
+                            <button
+                                className="add-button"
                                 onClick={handleAddToCart}
-                                disabled={isAdded}
+                                disabled={state.isAdded}
                             >
-                                {isAdded ? "Added" : "Add"}
+                                {state.isAdded ? "Added" : "Add"}
                             </button>
 
                             <div className="comments-section">
@@ -145,4 +176,4 @@ export const ProductDetail = ({ id, onClose }) => {
             </div>
         </>
     );
-};
+}
