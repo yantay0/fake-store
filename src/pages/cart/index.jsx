@@ -1,17 +1,30 @@
 import React, { useCallback, useMemo } from "react";
-
-import { useCart } from '../../context/CartContext'; 
-import './cart.scss'; 
+import { useCart } from "../../context/CartContext";
+import "./cart.scss";
 
 export const CartPage = () => {
-    const { cartItems, removeFromCart } = useCart(); 
+    const { cartItems, removeFromCart, updateQuantity } = useCart();
 
-    const handleRemoveFromCart = useCallback((index) => {
-        removeFromCart(index);
-    }, [removeFromCart]);
+    const handleRemoveFromCart = useCallback(
+        (index) => {
+            removeFromCart(index);
+        },
+        [removeFromCart]
+    );
+
+    const handleQuantityChange = useCallback(
+        (index, quantity) => {
+            if (quantity > 0) {
+                updateQuantity(index, quantity);
+            }
+        },
+        [updateQuantity]
+    );
 
     const totalPrice = useMemo(() => {
-        return cartItems.reduce((total, item) => total + item.price, 0).toFixed(2);
+        return cartItems
+            .reduce((total, item) => total + item.price * (item.quantity || 1), 0)
+            .toFixed(2);
     }, [cartItems]);
 
     return (
@@ -26,8 +39,20 @@ export const CartPage = () => {
                                 <div className="item-details">
                                     <h2>{item.title}</h2>
                                     <p className="price">Price: ${item.price}</p>
+                                    <div className="quantity-control">
+                                        <label htmlFor={`quantity-${index}`}>Quantity:</label>
+                                        <input
+                                            id={`quantity-${index}`}
+                                            type="number"
+                                            value={item.quantity || 1}
+                                            min="1"
+                                            onChange={(e) =>
+                                                handleQuantityChange(index, parseInt(e.target.value, 10))
+                                            }
+                                        />
+                                    </div>
                                 </div>
-                                <button 
+                                <button
                                     className="remove-button"
                                     onClick={() => handleRemoveFromCart(index)}
                                 >
