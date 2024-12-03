@@ -6,6 +6,7 @@ import { CartPage } from "../pages/cart";
 import { Login } from "../pages/login/index";
 import { ProfilePage } from "../pages/profile/Profile";
 import { useAuth } from "../context/AuthContext";
+import { WishlistPage } from '../pages/wishlist/WishlistPage';
 
 const ProtectedRoute = ({ children }) => {
     const { isAuthenticated, isLoading } = useAuth();
@@ -42,6 +43,14 @@ export const RouteList = () => (
                 </ProtectedRoute>
             }
         />
-        <Route path="*" element={<Navigate to="/" />} />
+        <Route
+            path="/wishlist"
+            element={
+                <ProtectedRoute>
+                    <WishlistPage />
+                </ProtectedRoute>
+            }
+        />
+        <Route path="*" element={<Navigate to="/" />}/>
     </Routes>
 );
