@@ -41,8 +41,9 @@
             }
         }
 
-        .remove-button {
+        .remove-button, .move-button {
             background-color: #f07f7f;
+            margin-left: 10px;
             color: white;
             border: none;
             padding: 10px 20px;

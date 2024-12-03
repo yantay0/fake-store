@@ -1,9 +1,16 @@
-import React from 'react';
-import { useWishlist } from '../../context/WishlistContext';
-import './WishlistPage.scss';
+import React from "react";
+import { useWishlist } from "../../context/WishlistContext";
+import { useCart } from "../../context/CartContext";
+import "./WishlistPage.scss";
 
 export const WishlistPage = () => {
     const { wishlist, removeFromWishlist } = useWishlist();
+    const { addToCart } = useCart();
+
+    const moveToCart = (product) => {
+        removeFromWishlist(product.id);
+        addToCart(product);
+    };
 
     return (
         <div className="wishlist-page">
@@ -17,12 +24,20 @@ export const WishlistPage = () => {
                                 <h2>{product.title}</h2>
                                 <p className="price">Price: ${product.price}</p>
                             </div>
-                            <button
-                                className="remove-button"
-                                onClick={() => removeFromWishlist(product.id)}
-                            >
-                                Удалить
-                            </button>
+                            <div className="wishlist-buttons">
+                                <button
+                                    className="remove-button"
+                                    onClick={() => removeFromWishlist(product.id)}
+                                >
+                                    Удалить
+                                </button>
+                                <button
+                                    className="move-button"
+                                    onClick={() => moveToCart(product)}
+                                >
+                                    Переместить в корзину
+                                </button>
+                            </div>
                         </div>
                     ))}
                 </div>
