@@ -16,6 +16,11 @@ export const NavBar = () => {
             key: 1,
             name: "Корзина",
             routeTo: "/cart",
+        },
+        {
+            key: 2,
+            name: "Wishlist",
+            routeTo: "/wishlist",
         }
     ];
 
@@ -23,7 +28,10 @@ export const NavBar = () => {
         <div className="navbar">
             {navigationItems.map((item) => (
                 <div key={item.key} className="navbar-item">
-                    <NavLink to={item.routeTo} className="link">
+                    <NavLink 
+                        to={item.routeTo} 
+                        className={({ isActive }) => `link ${isActive ? "active" : ""}`}
+                    >
                         <h2>{item.name}</h2>
                     </NavLink>
                 </div>

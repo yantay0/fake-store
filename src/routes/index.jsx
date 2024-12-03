@@ -5,6 +5,7 @@ import { HomePage } from "../pages/home/Home";
 import { CartPage } from "../pages/cart";
 import { Login } from "../pages/login/index";
 import { useAuth } from "../context/AuthContext";
+import { WishlistPage } from '../pages/wishlist/WishlistPage';
 
 // Компонент для защиты маршрутов
 const ProtectedRoute = ({ children }) => {
@@ -28,6 +29,14 @@ export const RouteList = () => (
             element={
                 <ProtectedRoute>
                     <CartPage />
+                </ProtectedRoute>
+            }
+        />
+        <Route
+            path="/wishlist"
+            element={
+                <ProtectedRoute>
+                    <WishlistPage />
                 </ProtectedRoute>
             }
         />

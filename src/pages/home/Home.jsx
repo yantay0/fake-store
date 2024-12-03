@@ -1,9 +1,10 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import axios from 'axios';
-
-import { ProductDetail } from '../product-detail';
-import './Home.scss';
+import { AiOutlineHeart, AiFillHeart } from 'react-icons/ai';
 import { useCart } from '../../context/CartContext';
+import { useWishlist } from '../../context/WishlistContext';
+import './Home.scss';
+import { ProductDetail } from '../product-detail';
 
 export const HomePage = () => {
     const [products, setProducts] = useState([]);
@@ -11,9 +12,10 @@ export const HomePage = () => {
     const [selectedCategory, setSelectedCategory] = useState('all');
     const [selectedProductId, setSelectedProductId] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
-    const [suggestions, setSuggestions] = useState([]); // Для хранения предложений
+    const [suggestions, setSuggestions] = useState([]);
 
     const { addToCart } = useCart();
+    const { addToWishlist, removeFromWishlist, wishlist } = useWishlist();
 
     const fetchProducts = async () => {
         try {
@@ -56,17 +58,19 @@ export const HomePage = () => {
             );
     }, [selectedCategory, products, searchTerm]);
 
+    const isInWishlist = (productId) => wishlist.some(item => item.id === productId);
+
     const handleSuggestionClick = (title) => {
         setSearchTerm(title);
         setSuggestions([]);
     };
-    
+
     useEffect(() => {
         if (searchTerm.length > 0) {
             const filteredSuggestions = products.filter(product =>
                 product.title.toLowerCase().includes(searchTerm.toLowerCase())
             ).slice(0, 5);
-    
+
             if (filteredSuggestions.length === 1 && filteredSuggestions[0].title.toLowerCase() === searchTerm.toLowerCase()) {
                 setSuggestions([]);
             } else {
@@ -76,7 +80,7 @@ export const HomePage = () => {
             setSuggestions([]);
         }
     }, [searchTerm, products]);
-    
+
     return (
         <div className="home">
             <div className="search-bar">
@@ -86,7 +90,6 @@ export const HomePage = () => {
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                 />
-                {}
                 {suggestions.length > 0 && (
                     <ul className="autocomplete-suggestions">
                         {suggestions.map((suggestion) => (
@@ -120,7 +123,21 @@ export const HomePage = () => {
                             key={product.id} 
                             className="product-card"
                         >
-                            <div 
+                            <button
+                                className="wishlist-button"
+                                onClick={() =>
+                                    isInWishlist(product.id)
+                                        ? removeFromWishlist(product.id)
+                                        : addToWishlist(product)
+                                }
+                            >
+                                {isInWishlist(product.id) ? (
+                                    <AiFillHeart size={20} />
+                                ) : (
+                                    <AiOutlineHeart size={20} />
+                                )}
+                            </button>
+                            <div
                                 className="product-details"
                                 onClick={() => handleOpenModal(product.id)}
                             >
@@ -130,7 +147,9 @@ export const HomePage = () => {
                                 <p className="price">Price: ${product.price}</p>
                             </div>
 
-                            <button className="add-button" onClick={() => addToCart(product)}>ADD</button>
+                            <button className="button add-button" onClick={() => addToCart(product)}>
+                                ADD
+                            </button>
                         </div>
                     ))
                 ) : (
